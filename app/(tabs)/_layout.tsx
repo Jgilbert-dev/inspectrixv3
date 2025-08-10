@@ -1,54 +1,48 @@
 // app/(tabs)/_layout.tsx
-import React from "react";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Link, Tabs } from "expo-router";
-import { Pressable } from "react-native";
+import React, { useEffect } from "react";
+import { Tabs, useRouter } from "expo-router";
+import { ActivityIndicator } from "react-native-paper";
+import { View } from "react-native";
+import { getGuardState } from "@/lib/guards";
 
-import Colors from "@/constants/Colors";
-import { useColorScheme } from "@/components/useColorScheme";
-import { useClientOnlyValue } from "@/components/useClientOnlyValue";
+export default function TabsLayout() {
+  const router = useRouter();
+  const [state, setState] = React.useState<{
+    kind: "loading" | "blocked" | "ready";
+    reason?: string;
+  }>({ kind: "loading" });
 
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>["name"];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const g = await getGuardState();
+      if (!mounted) return;
+      if ("loading" in g) setState({ kind: "loading" });
+      else if ("blocked" in g) {
+        setState({ kind: "blocked", reason: g.blocked });
+        router.replace("/login");
+      } else {
+        setState({ kind: "ready" });
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  if (state.kind === "loading") {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Reports",
-          tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="create"
-        options={{
-          title: "Create Report",
-          tabBarIcon: ({ color }) => <TabBarIcon name="plus" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
-        }}
-      />
+    <Tabs screenOptions={{ headerShown: true }}>
+      <Tabs.Screen name="index" options={{ title: "Reports" }} />
+      <Tabs.Screen name="create" options={{ title: "Create Report" }} />
+      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
     </Tabs>
   );
 }

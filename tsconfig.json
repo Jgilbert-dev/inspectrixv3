@@ -3,7 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-jsx",
-    "paths": { "@/*": ["./*"] }
+    "baseUrl": ".", // <-- add this
+    "paths": { "@/*": ["./*"] } // already good
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }
