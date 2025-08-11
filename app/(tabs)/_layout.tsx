@@ -1,48 +1,51 @@
 // app/(tabs)/_layout.tsx
-import React, { useEffect } from "react";
-import { Tabs, useRouter } from "expo-router";
-import { ActivityIndicator } from "react-native-paper";
-import { View } from "react-native";
-import { getGuardState } from "@/lib/guards";
+// Purpose: Tabs layout — defines Home/Create/Profile tabs. Initial route is "home".
+
+import { Tabs } from "expo-router";
+import { useTheme } from "react-native-paper";
+import { MaterialIcons } from "@expo/vector-icons";
 
 export default function TabsLayout() {
-  const router = useRouter();
-  const [state, setState] = React.useState<{
-    kind: "loading" | "blocked" | "ready";
-    reason?: string;
-  }>({ kind: "loading" });
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      const g = await getGuardState();
-      if (!mounted) return;
-      if ("loading" in g) setState({ kind: "loading" });
-      else if ("blocked" in g) {
-        setState({ kind: "blocked", reason: g.blocked });
-        router.replace("/login");
-      } else {
-        setState({ kind: "ready" });
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [router]);
-
-  if (state.kind === "loading") {
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator />
-      </View>
-    );
-  }
+  const theme = useTheme();
 
   return (
-    <Tabs screenOptions={{ headerShown: true }}>
-      <Tabs.Screen name="index" options={{ title: "Reports" }} />
-      <Tabs.Screen name="create" options={{ title: "Create Report" }} />
-      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+    <Tabs
+      initialRouteName="home"
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.colors.background },
+        headerTitleStyle: { color: theme.colors.onBackground },
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
+        tabBarStyle: { backgroundColor: theme.colors.surface },
+      }}
+    >
+      <Tabs.Screen
+        name="home"
+        options={{
+          title: "Home",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="home" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="create"
+        options={{
+          title: "Create",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="add-box" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="person" color={color} size={size} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

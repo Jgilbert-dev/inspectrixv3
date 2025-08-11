@@ -1,26 +1,23 @@
 // app/_layout.tsx
-import React from "react";
-import {
-  ThemeProvider as PaperProvider,
-  MD3LightTheme as Light,
-  MD3DarkTheme as Dark,
-} from "react-native-paper";
+// Purpose: Root app layout — provides Paper theme + router slot.
+
+import { useMemo } from "react";
 import { Slot } from "expo-router";
+import { PaperProvider, MD3LightTheme, MD3DarkTheme } from "react-native-paper";
 import { useColorScheme } from "react-native";
-import { AuthProvider, useAuth } from "@/lib"; // single source
-import { SnackbarProvider } from "@/components/ui/SnackbarProvider";
+import { StatusBar } from "expo-status-bar";
 
 export default function RootLayout() {
   const scheme = useColorScheme();
-  const theme = scheme === "dark" ? Dark : Light;
+  const theme = useMemo(
+    () => (scheme === "dark" ? MD3DarkTheme : MD3LightTheme),
+    [scheme]
+  );
 
   return (
     <PaperProvider theme={theme}>
-      <AuthProvider>
-        <SnackbarProvider>
-          <Slot />
-        </SnackbarProvider>
-      </AuthProvider>
+      <StatusBar style={scheme === "dark" ? "light" : "dark"} />
+      <Slot />
     </PaperProvider>
   );
 }

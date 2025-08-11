@@ -3,9 +3,8 @@ import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import { ActivityIndicator, Button, Text } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useAuth } from "@/lib/auth";
+import { useAuth, mapFriendlyErrorMessage } from "@/lib"; // single source
 import { useSnackbar } from "@/components/ui/SnackbarProvider";
-import { mapFriendlyErrorMessage } from "@/lib/utils";
 
 export default function InviteAcceptScreen() {
   const { token } = useLocalSearchParams<{ token?: string }>();
@@ -29,7 +28,7 @@ export default function InviteAcceptScreen() {
       try {
         await acceptInvite(token);
         setStatus("ok");
-        router.replace("/(tabs)");
+        router.replace("/profile");
       } catch (err: any) {
         setStatus("error");
         show(mapFriendlyErrorMessage(err), { critical: true, timeoutMs: 7000 });

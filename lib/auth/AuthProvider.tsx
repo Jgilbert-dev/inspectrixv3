@@ -9,7 +9,7 @@ import React, {
   useState,
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "./supabaseClient";
+import { supabase } from "@/lib/auth/supabaseClient";
 import type { Membership } from "./types";
 
 type AuthContextValue = {
@@ -20,6 +20,7 @@ type AuthContextValue = {
   signInWithEmail: (email: string, password: string) => Promise<{ user: User }>;
   signUpWithEmail: (email: string, password: string) => Promise<{ user: User }>;
   signOut: () => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>; // ✅ added
 };
 
 export const AuthContext = createContext<AuthContextValue | undefined>(
@@ -109,6 +110,18 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
     await refresh();
   }, [refresh]);
 
+  // ✅ Added: updatePassword
+  const updatePassword = useCallback(
+    async (newPassword: string) => {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+      if (error) throw error;
+      await refresh();
+    },
+    [refresh]
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -118,6 +131,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
       signInWithEmail,
       signUpWithEmail,
       signOut,
+      updatePassword, // ✅ now provided
     }),
     [
       user,
@@ -127,6 +141,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
       signInWithEmail,
       signUpWithEmail,
       signOut,
+      updatePassword,
     ]
   );
 

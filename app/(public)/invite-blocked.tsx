@@ -3,7 +3,7 @@ import React from "react";
 import { View } from "react-native";
 import { Button, Text } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib";
 
 export default function InviteBlocked() {
   const router = useRouter();
